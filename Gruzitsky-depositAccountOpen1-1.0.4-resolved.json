@@ -1,0 +1,306 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Открытие депозитного счета клиента",
+    "description": "На основании заявления клиента сотрудник банка FictionBank открывает в системе депозитный счет физическому лицу. Полное описание [в файле с ДЗ-6](https://docs.google.com/document/d/1qznzdAsLhsUPsG7qmIhFg7ZR_KkneSBc/edit?usp=sharing&ouid=103484950314828724741&rtpof=true&sd=true).",
+    "contact": {
+      "name": "Sergey Gruzitsky",
+      "email": "s.gruzitsky@gmail.com"
+    },
+    "version": "1.0.4"
+  },
+  "servers": [
+    {
+      "url": "https://virtserver.swaggerhub.com/Gruzitsky/depositAccountOpen/1.0.1",
+      "description": "SwaggerHub API Auto Mocking"
+    },
+    {
+      "url": "https://api.fictionbank.com",
+      "description": "fictional server of a fictional bank"
+    }
+  ],
+  "paths": {
+    "/users": {
+      "description": "Access to clients database",
+      "get": {
+        "description": "Seach client by name, id, or passport",
+        "parameters": [
+          {
+            "name": "Last Name",
+            "in": "query",
+            "required": true,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string",
+              "example": "Gruzitsky"
+            }
+          },
+          {
+            "name": "First Name",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string",
+              "example": "Sergey"
+            }
+          },
+          {
+            "name": "Passport",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string",
+              "example": "MP1999414"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The client(s) found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/user"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "404": {
+            "description": "Client not found"
+          },
+          "418": {
+            "description": "I'm a teapot"
+          }
+        }
+      }
+    },
+    "/users/register": {
+      "post": {
+        "description": "Service for registering new clients",
+        "parameters": [
+          {
+            "name": "Last Name",
+            "in": "query",
+            "required": true,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string",
+              "example": "Gruzitsky"
+            }
+          },
+          {
+            "name": "First Name",
+            "in": "query",
+            "required": true,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string",
+              "example": "Sergey"
+            }
+          },
+          {
+            "name": "Birth date",
+            "in": "query",
+            "required": true,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "example": "1992-03-01"
+            }
+          },
+          {
+            "name": "Passport",
+            "in": "query",
+            "required": true,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string",
+              "example": "MP1999414"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/user"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "The client has been successfully added!"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Something went wrong, call your admin"
+          }
+        }
+      }
+    },
+    "/accounts/create": {
+      "post": {
+        "description": "Service for adding new deposit accounts",
+        "parameters": [
+          {
+            "name": "Client's ID",
+            "in": "query",
+            "required": true,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "integer",
+              "example": 123456
+            }
+          },
+          {
+            "name": "Deposit Type",
+            "in": "query",
+            "description": "to choose the correct account number structure",
+            "required": true,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "demand",
+                "term"
+              ]
+            }
+          },
+          {
+            "name": "Deposit currency",
+            "in": "query",
+            "required": true,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "USD",
+                "BYN",
+                "EUR",
+                "RUB"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/account"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "The account has been successfully added!"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Something went wrong, call your admin"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "user": {
+        "type": "object",
+        "properties": {
+          "userID": {
+            "type": "integer",
+            "example": 123456
+          },
+          "userFirstName": {
+            "type": "string",
+            "example": "Sergey"
+          },
+          "userLastName": {
+            "type": "string",
+            "example": "Gruzitsky"
+          },
+          "userBirthDate": {
+            "type": "string",
+            "format": "date",
+            "example": "1992-03-01"
+          },
+          "userPassport": {
+            "type": "string",
+            "example": "MP1999414"
+          }
+        }
+      },
+      "account": {
+        "type": "object",
+        "properties": {
+          "accountNumber": {
+            "type": "string",
+            "example": "3414-123456-001"
+          },
+          "accOwnerId": {
+            "type": "integer",
+            "example": 123456
+          },
+          "accOwnerName": {
+            "type": "string",
+            "example": "Sergey Gruzitsky"
+          },
+          "depositType": {
+            "type": "string",
+            "example": "term",
+            "enum": [
+              "demand",
+              "term"
+            ]
+          },
+          "accountCurr": {
+            "type": "string",
+            "example": "USD",
+            "enum": [
+              "USD",
+              "BYN",
+              "EUR",
+              "RUB"
+            ]
+          },
+          "accountBal": {
+            "type": "number",
+            "example": 0
+          },
+          "isArrested": {
+            "type": "boolean",
+            "example": false
+          }
+        },
+        "description": "Deposit account, other types are not allowed for this particular officer"
+      }
+    }
+  }
+}
