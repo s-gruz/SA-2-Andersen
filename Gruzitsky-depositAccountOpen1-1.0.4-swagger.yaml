@@ -1,0 +1,201 @@
+openapi: 3.0.0
+info:
+  version: 1.0.4
+  title: Открытие депозитного счета клиента
+  description: 
+    На основании заявления клиента сотрудник банка FictionBank открывает в системе
+    депозитный счет физическому лицу. Полное описание [в файле с ДЗ-6](https://docs.google.com/document/d/1qznzdAsLhsUPsG7qmIhFg7ZR_KkneSBc/edit?usp=sharing&ouid=103484950314828724741&rtpof=true&sd=true). 
+  contact: 
+    name: Sergey Gruzitsky 
+    email: s.gruzitsky@gmail.com
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/Gruzitsky/depositAccountOpen/1.0.1
+  - url: https://api.fictionbank.com
+    description: fictional server of a fictional bank
+components:
+  schemas:
+    user:
+      type: object
+      properties:
+        userID:
+          type: integer
+          example: 123456
+        userFirstName:
+          type: string
+          example: "Sergey"
+        userLastName:
+          type: string
+          example: "Gruzitsky"
+        userBirthDate:
+          type: string
+          format: date
+          example: "1992-02-30"
+        userPassport:
+          type: string
+          example: "MP1999414"
+        
+    account:
+      type: object
+      description: Deposit account, other types are not allowed for this particular officer
+      properties:
+        accountNumber:
+          type: string
+          example: "3414-123456-001"
+        accOwnerId:
+          type: integer
+          example: 123456
+        accOwnerName:
+          type: string
+          example: "Sergey Gruzitsky"
+        depositType:
+          type: string
+          enum:
+            - demand
+            - term
+          example: term
+        accountCurr:
+          type: string
+          enum:
+            - USD
+            - BYN
+            - EUR
+            - RUB
+          example: USD
+        accountBal:
+          type: number
+          example: 0.00
+        isArrested: 
+          type: boolean
+          example: false
+          
+          
+paths:
+  /users:
+    description: Access to clients database
+    get: 
+      description: Seach client by name, id, or passport
+      parameters:
+        - in: query
+          name: Last Name
+          required: true
+          schema:
+            type: string
+            example: Gruzitsky
+        - in: query
+          name: First Name
+          required: false
+          schema:
+            type: string
+            example: Sergey
+        - in: query
+          name: Passport
+          required: false
+          schema:
+            type: string
+            example: "MP1999414" 
+      responses:
+        200:
+          description: The client(s) found
+          content: 
+            application/json: 
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/user'
+        404:
+          description: Client not found
+        400:
+          description: Bad request
+        418:
+          description: I'm a teapot
+    
+  /users/register:
+    post:
+      description: Service for registering new clients
+      parameters:
+        - in: query
+          name: Last Name
+          required: true
+          schema:
+            type: string
+            example: Gruzitsky
+        - in: query
+          name: First Name
+          required: true
+          schema:
+            type: string
+            example: Sergey 
+        - in: query   
+          name: Birth date
+          required: true
+          schema:
+            type: string
+            format: date
+            example: "1992-02-30"
+        - in: query
+          name: Passport
+          required: true
+          schema:
+            type: string
+            example: "MP1999414"
+            
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+                $ref: '#/components/schemas/user'
+      
+      responses:
+        201:
+          description: The client has been successfully added!
+        400:
+          description: Bad request
+        500: 
+          description: Something went wrong, call your admin
+          
+          
+  /accounts/create:
+    post:
+      description: Service for adding new deposit accounts
+      parameters:
+        - in: query
+          name: Client's ID
+          required: true
+          schema:
+            type: integer
+            example: 123456
+        - in: query
+          name: Deposit Type
+          required: true
+          description: to choose the correct account number structure
+          schema:
+            enum:
+            - demand
+            - term
+        - in: query
+          name: Deposit currency
+          required: true
+          schema:
+            type: string
+            enum:
+              - USD
+              - BYN
+              - EUR
+              - RUB
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+                $ref: '#/components/schemas/account'
+      
+      responses:
+        201:
+          description: The account has been successfully added!
+        400:
+          description: Bad request
+        500: 
+          description: Something went wrong, call your admin
